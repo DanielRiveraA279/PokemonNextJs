@@ -21,7 +21,6 @@ const FavoritePage = () => {
                     ? (<NoFavorites />)
                     : (<FavoritePokemons pokemons={favoritePokemons} />)
             }
-            <NoFavorites />
         </Layout>
     )
 }
