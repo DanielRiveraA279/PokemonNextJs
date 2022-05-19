@@ -114,7 +114,8 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
         paths: pokemon151.map(id => ({
             params: { id }
         })),
-        fallback: false //esto es para que valide si no hay una pagina registrada, en paths [{params: {id: '1'}}] que envie un 404
+        // fallback: false //esto es para que valide si no hay una pagina registrada, en paths [{params: {id: '1'}}] que envie un 404
+        fallback: 'blocking'
     }
 }
 
@@ -123,10 +124,23 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     const { id } = params as { id: string }; //tipar el id y desestructurar
 
+    const pokemon = await getPokemonInfo(id);
+
+    if (!pokemon) {
+        return {
+            redirect: {
+                destination: '/', //redireccionamos al home si es null el objeto pokemon
+                permanent: false
+            }
+        }
+    }
+
     return {
         props: {
-            pokemon: await getPokemonInfo(id)
-        }
+            pokemon
+        },
+        //Incremental Static Renegeration (ISR)
+        revalidate: 86400  //mecanismo de regeneracion en 24 horas
     }
 }
 

@@ -119,7 +119,8 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
         paths: pokemonNames.map(name => ({
             params: { name }
         })),
-        fallback: false //esto es para que valide si no hay una pagina registrada, en paths [{params: {id: '1'}}] que envie un 404
+        // fallback: false //esto es para que valide si no hay una pagina registrada, en paths [{params: {id: '1'}}] que envie un 404
+        fallback: 'blocking'
     }
 }
 
@@ -129,10 +130,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     //traemos el name que armo getStaticPaths
     const { name } = params as { name: string };
 
+    const pokemon = await getPokemonInfo(name);
+
+    if (!pokemon) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
+    }
+
     return {
         props: {
-            pokemon: await getPokemonInfo(name)
-        }
+            pokemon
+        },
+        revalidate: 86400 //regenera en 24
     }
 }
 
